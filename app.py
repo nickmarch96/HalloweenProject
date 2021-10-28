@@ -1,42 +1,69 @@
+import socketio
+from playsound import playsound
+import librosa
+import soundfile
+import time
+import RPi.GPIO as GPIO
 
 
-from flask import Flask, render_template
-from flask_socketio import SocketIO
+sio = socketio.Server()
+app = socketio.WSGIApp(sio, static_files={
+	"/": "./public/"
+	})
 
 
-app = Flask(__name__)
-socketio = SocketIO(app)
+global_vars = {
+	"waveBuffer": "buffer.wav",
+	"dispenseTime": 5
+	}
+
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(23, GPIO.OUT)
 
 
-def data():
-	return {"data": 12}
+@sio.on("connect")
+def connect(sid, environ):
+	print(sid, "Connected!")
+
+@sio.on("disconnect")
+def disconnect(sid):
+	print(sid, "disconnected...")
+
+@sio.on("data")
+def data_recv(sid, data):
+	print("Received data!")
+	print(sid, data)
+
+@sio.on("audio-blob")
+def recv_audio(sid, data):
+	print("Received audio!")
+	blob = data["audio-blob"]
+	pitch = data["audio-pitch"]
+	if not pitch:
+		return
+
+	print("Building buffer and processing audio...", end="")
+	with open(global_vars["waveBuffer"], "wb") as o:
+		o.write(data["audio-blob"])
+
+	try:
+		y, sr = librosa.load(global_vars["waveBuffer"])
+		y_shifted = librosa.effects.pitch_shift(y, sr, n_steps=int(data["audio-pitch"])*-1)
+
+		soundfile.write(global_vars["waveBuffer"], y_shifted, sr)
+
+		print("done")
+		playsound("buffer.wav")
+	except:
+		print("Failed...")
 
 
+@sio.on("dispense")
+def dispense(sid, data):
+	print("Dispensing Candy!")
+
+	GPIO.output(23, GPIO.HIGH)
+	time.sleep(global_vars["dispenseTime"])
+	GPIO.output(23, GPIO.LOW)
 
 
-@app.route('/')
-def default():
-	return render_template('controller.html')
-
-
-@socketio.on("connect")
-def ws_conn():
-	print("Connected!")
-	socketio.emit("status", data())
-
-
-@socketio.on("disconnect")
-def ws_disconn():
-	print("Disconnected.")
-
-
-@socketio.on("get_status")
-def ws_get_status(msg):
-	print(msg)
-	socketio.emit("status", data())
-
-
-
-	
-if __name__ == '__main__':
-	app.run(host="10.0.0.50", port=80)

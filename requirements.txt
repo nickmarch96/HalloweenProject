@@ -1,0 +1,7 @@
+socketio
+eventlet==0.30.2
+gevent
+gevent-websocket
+librosa
+playsound
+soundfile

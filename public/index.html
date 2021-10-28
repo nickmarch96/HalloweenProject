@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+	<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="index.css">
+			
+</head>
+<body>
+	<h1> Halloween Controller </h1>
+
+	<div>
+		<label for="quantity">Pitch Decrease</label>
+		<input type="number" id="pitch" name="pitch" min="1" max="15">
+	<div>
+		<form>
+			<button id="recbtn" type="button">Click Me!</button>
+		</form>
+	</div>
+	<div>
+		<form>
+			<button id="my-button" type="button">Click Me!</button>
+		</form>
+	</div>
+	<div>
+		<form>
+			<button id="candybtn" type="button">Dispense Candy!</button>
+		</form>
+	</div>
+
+	
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js" integrity="sha512-WL6WGKMPBiM9PnHRYIn5YEtq0Z8XP4fkVb4qy7PP4vhmYQErJ/dySyXuFIMDf1eEYCXCrQrMJfkNwKc9gsjTjA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="index.js"></script>
+	<script src="js/recorder.js"></script>
+
+</body>
+</html>
